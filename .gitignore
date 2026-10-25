@@ -1,0 +1,24 @@
+# Banco de dados local (dados pessoais NÃO vão para o repositório)
+*.db
+*.db-journal
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Ferramentas
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# Sistema operacional / editor
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/

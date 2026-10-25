@@ -1,0 +1,3 @@
+# O projeto roda apenas com a biblioteca padrão do Python (>= 3.10).
+# As linhas abaixo são somente para desenvolvimento (testes).
+pytest>=8.0

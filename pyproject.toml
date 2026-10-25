@@ -1,0 +1,14 @@
+[project]
+name = "gerenciador-financas-modular"
+version = "0.1.0"
+description = "Gerenciador de gastos pessoais em Python + SQLite, com arquitetura em camadas."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 88
+src = ["src", "tests"]
