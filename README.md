@@ -119,7 +119,11 @@ src/financas/
 └── servicos/
     └── financas_servico.py          # validações e regras de negócio
 
-tests/                               # testes automatizados (a implementar)
+tests/
+├── conftest.py                      # fixtures com banco em memória
+├── test_servico.py                  # testes das regras de negócio
+├── test_repositorios.py             # testes de banco, chave estrangeira e JOIN
+└── test_formatadores.py             # testes de formatação de moeda e data
 ```
 
 ---
@@ -141,9 +145,9 @@ tests/                               # testes automatizados (a implementar)
 
 ## 🚧 Ainda por fazer
 
-- Interface de terminal para interação com a pessoa usuária.
-- Testes automatizados para serviços, repositórios e formatadores.
-- Definição e aplicação consistente do fuso horário configurado.
+- Aplicação efetiva do fuso horário configurado às datas registradas.
+- Edição e exclusão de transações.
+- Categorias personalizadas criadas pela pessoa usuária.
 
 ---
 
@@ -163,51 +167,102 @@ datas ainda está pendente.
 
 ---
 
-## ▶️ Uso atual
+## ▶️ Como executar
 
-O projeto ainda não tem um ponto de entrada ou menu de terminal. As operações
-estão disponíveis pela camada de serviço. O trecho abaixo cria um banco em
-memória, inicializa o esquema e as categorias padrão:
+### Pré-requisitos
 
-```python
-import sqlite3
+- Python 3.10 ou superior (`python --version` para conferir)
 
-from financas.banco import criar_esquema
-from financas.modelos import TipoMovimento
-from financas.repositorios import CategoriaRepositorio, TransacaoRepositorio
-from financas.servicos.financas_servico import FinancasServico
+### Passo a passo
 
-conexao = sqlite3.connect(":memory:")
-conexao.row_factory = sqlite3.Row
-conexao.execute("PRAGMA foreign_keys = ON;")
-criar_esquema(conexao)
-
-servico = FinancasServico(
-    CategoriaRepositorio(conexao),
-    TransacaoRepositorio(conexao),
-)
-servico.inicializar_dados_padrao()
-
-categoria = servico.listar_categorias(TipoMovimento.RECEITA)[0]
-servico.registrar_transacao("Salário", "3500,00", categoria.id)
-resumo = servico.gerar_resumo()
-
-print(resumo.saldo_centavos)
-```
-
-Para executar um script com esses imports a partir da raiz do repositório,
-adicione `src` ao caminho de módulos do Python.
-
-**PowerShell:**
-```powershell
-$env:PYTHONPATH = "src"
-python exemplo.py
-```
-
-**Bash / Linux / macOS:**
 ```bash
-PYTHONPATH=src python exemplo.py
+# 1. Clone o repositório
+git clone https://github.com/jobsonmedeiros/gerenciador-financas-modular.git
+
+# 2. Entre na pasta
+cd gerenciador-financas-modular
+
+# 3. (opcional, recomendado) crie um ambiente virtual
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
+
+# 4. Execute
+python main.py
 ```
+
+Na primeira execução o sistema cria `financas.db` e as 9 categorias padrão.
+
+### Menu
+
+```
+=== GERENCIADOR DE FINANÇAS PESSOAIS ===
+1. Registrar transação
+2. Ver extrato do mês
+3. Resumo por categoria
+4. Listar categorias
+0. Sair
+```
+
+### Exemplo de saída
+
+```
+--- Extrato de 10/2026 ---
+#6   26/10/2026 14:06  -R$ 89,90      (Educação) Curso de Python
+#5   26/10/2026 14:06  -R$ 310,20     (Transporte) Combustível
+#4   26/10/2026 14:06  -R$ 1.500,00   (Moradia) Aluguel
+#3   26/10/2026 14:06  -R$ 842,35     (Alimentação) Supermercado
+#2   26/10/2026 14:06  +R$ 1.200,00   (Freelance) Projeto freelance
+#1   26/10/2026 14:06  +R$ 5.200,00   (Salário) Salário outubro
+--------------------------------------------------------
+Receitas: R$ 6.400,00
+Despesas: R$ 2.742,45
+Saldo:    R$ 3.657,55
+
+--- Resumo por categoria (10/2026) ---
+Salário         Receita     R$ 5.200,00
+Moradia         Despesa     R$ 1.500,00
+Freelance       Receita     R$ 1.200,00
+Alimentação     Despesa       R$ 842,35
+Transporte      Despesa       R$ 310,20
+Educação        Despesa        R$ 89,90
+--------------------------------------------------------
+Saldo do mês: R$ 3.657,55
+```
+
+### Variáveis de ambiente
+
+| Variável | Efeito |
+|---|---|
+| `FINANCAS_DB` | caminho do arquivo do banco (padrão: `financas.db`) |
+| `FINANCAS_TZ` | fuso horário configurado (aplicação às datas ainda pendente) |
+
+---
+
+## 🧪 Testes
+
+```bash
+pip install -r requirements.txt
+python -m pytest
+```
+
+Resultado esperado:
+
+```
+...............................                                          [100%]
+31 passed in 0.27s
+```
+
+Os testes usam SQLite **em memória** (`:memory:`), então não tocam no banco
+real e rodam em menos de um segundo. Cobertura por arquivo:
+
+| Arquivo | O que verifica |
+|---|---|
+| `test_servico.py` | conversão de valores, validações, saldo, filtro por período |
+| `test_repositorios.py` | chave estrangeira, `CHECK`, `UNIQUE`, `JOIN` e `GROUP BY` |
+| `test_formatadores.py` | formatação de moeda, data, rótulo e sinal |
 
 ---
 
@@ -260,10 +315,13 @@ python -m pytest
 - [x] Repositório de categorias
 - [x] Repositório de transações e consultas agregadas
 - [x] Camada de serviço com validações e cálculos
-- [x] Funções iniciais de formatação
-- [ ] Testes automatizados
-- [ ] Interface de terminal e relatórios
-- [ ] Documentação final e instruções de uso completas
+- [x] Funções de formatação
+- [x] Interface de terminal e relatórios
+- [x] Testes automatizados
+- [ ] Aplicação do fuso horário configurado
+- [ ] Edição e exclusão de transações
+- [ ] Exportação de relatório para CSV
+- [ ] Versão web com FastAPI (reaproveitando serviço e repositórios)
 
 ---
 
