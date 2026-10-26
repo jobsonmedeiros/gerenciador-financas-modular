@@ -4,7 +4,8 @@ Aplicação em **Python e SQLite** para registrar receitas e despesas e consulta
 resumos financeiros por período e categoria, construída com arquitetura em
 camadas e código modular.
 
-> **Status:** em desenvolvimento. A estrutura de domínio, persistência e regras de negócio já estão implementadas. A interface de terminal e os testes automatizados ainda estão pendentes.
+> **Status:** funcional. Domínio, persistência, regras de negócio, interface de
+> terminal e testes automatizados estão implementados.
 
 ---
 
@@ -292,17 +293,6 @@ mantém a regra de negócio independente de terminal, API ou HTML.
 **7. `PRAGMA foreign_keys = ON` em cada conexão.**
 No SQLite a verificação de chave estrangeira é desligada por padrão — sem o
 `PRAGMA`, o banco aceitaria `categoria_id` inexistente.
-
----
-
-## 🧪 Testes
-
-A suíte de testes automatizados ainda está sendo criada. Quando houver testes
-em `tests/`, execute-os com:
-
-```bash
-python -m pytest
-```
 
 ---
 
